@@ -1,9 +1,9 @@
 #![no_std] // Don't link the std library
 #![no_main] // Disable default entry points
 
-mod vga_buffer;
+use core::panic::PanicInfo;
 
-use core::{panic::PanicInfo, fmt::Write};
+use kernel_gaming::{print, println};
 
 // Handle panics because core doesn't have that
 #[panic_handler]
@@ -14,11 +14,12 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[no_mangle] // Don't skew the name
 pub extern "C" fn _start() -> ! {
-    
-    vga_buffer::WRITER.lock().write_str("Hello there").unwrap();
-    print!(", how are you?");
-    println!("Does it work{}", "!");
+    kernel_gaming::init();
+
+    print!("how are you?");
+    x86_64::instructions::interrupts::int3();
+    println!("Does it work{}", "?");
     println!("Test new line...");
-    
+
     loop {}
 }
