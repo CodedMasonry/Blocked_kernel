@@ -16,8 +16,10 @@ fn panic(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     kernel_gaming::init();
 
+    unsafe {
+        *(0xdeadbeef as *mut u8) = 43;
+    };
     print!("how are you?");
-    x86_64::instructions::interrupts::int3();
     println!("Does it work{}", "?");
     println!("Test new line...");
 
