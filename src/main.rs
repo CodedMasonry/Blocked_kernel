@@ -15,10 +15,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[no_mangle] // Don't skew the name
 pub extern "C" fn _start() -> ! {
     kernel_gaming::init();
-
-    unsafe {
-        *(0xdeadbeef as *mut u8) = 43;
-    };
+    
     print!("how are you?");
     println!("Does it work{}", "?");
     println!("Test new line...");
