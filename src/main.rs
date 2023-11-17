@@ -9,16 +9,15 @@ use kernel_gaming::{print, println};
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    kernel_gaming::hlt_loop();
 }
 
 #[no_mangle] // Don't skew the name
 pub extern "C" fn _start() -> ! {
     kernel_gaming::init();
     
-    print!("how are you?");
+    println!("how are you?");
     println!("Does it work{}", "?");
-    println!("Test new line...");
 
     loop {}
 }

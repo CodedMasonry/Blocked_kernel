@@ -1,4 +1,4 @@
-use crate::{gdt, println};
+use crate::{gdt, println, print};
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin::mutex::spin;
@@ -14,6 +14,7 @@ lazy_static! {
                 .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
         }
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
+        idt[InterruptIndex::Keyboard.as_u8()].set_handler_fn(keyboard_interrupt_handler)
         idt
     };
 }
@@ -27,6 +28,7 @@ pub static PICS: spin::SpinMutex<ChainedPics> =
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
+    keyboard,
 }
 
 impl InterruptIndex {
@@ -55,5 +57,17 @@ extern "x86-interrupt" fn double_fault_handler(
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    println!("e");
+    print!(".");
+
+    unsafe {
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8())
+    }
+}
+
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    print!("k");
+
+    unsafe {
+        PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8())
+    }
 }
