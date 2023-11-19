@@ -3,6 +3,7 @@
 
 use core::panic::PanicInfo;
 
+use bootloader::{BootInfo, entry_point};
 use kernel_gaming::{println, hlt_loop};
 
 // Handle panics because core doesn't have that
@@ -12,14 +13,21 @@ fn panic(info: &PanicInfo) -> ! {
     kernel_gaming::hlt_loop();
 }
 
-#[no_mangle] // Don't skew the name
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
+    use kernel_gaming::memory::active_level_4_table;
+    use x86_64::VirtAddr;
     kernel_gaming::init();
 
-    use x86_64::registers::control::Cr3;
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let l4_table = unsafe { active_level_4_table(phys_mem_offset) };
 
-    let (level_4_page_table, _) = Cr3::read();
-    println!("Level 4 page table starts at: {:?}", level_4_page_table.start_address());
+    for (i, entry) in l4_table.iter().enumerate() {
+        if !entry.is_unused() {
+            println!("L4 Entry: {}: {:?}", i, entry);
+        }
+    }
 
     println!("how are you?");
     println!("Does it work{}", "?");
